@@ -1,0 +1,121 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: inventory.command.service
+
+  # Jackson configuration
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      indent-output: true
+
+# CSV Storage configuration
+csv:
+  storage:
+    path: src/main/resources/data
+  inventory:
+    filename: inventory-items.csv
+  events:
+    filename: events.csv
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventoryCommand:
+        register-health-indicator: true
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+        ignore-exceptions:
+          - com.meli.inventory.command.service.domain.exception.InventoryItemNotFoundException
+          - com.meli.inventory.command.service.domain.exception.InsufficientStockException
+
+  retry:
+    instances:
+      inventoryCommand:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+        ignore-exceptions:
+          - com.meli.inventory.command.service.domain.exception.OptimisticLockException
+          - com.meli.inventory.command.service.domain.exception.InsufficientStockException
+
+  bulkhead:
+    instances:
+      inventoryCommand:
+        max-concurrent-calls: 25
+        max-wait-duration: 0
+
+  ratelimiter:
+    instances:
+      inventoryApi:
+        limit-for-period: 100
+        limit-refresh-period: 1s
+        timeout-duration: 0s
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# OpenAPI/Swagger Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.inventory: DEBUG
+    org.springframework: INFO
+    io.github.resilience4j: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/inventory-command-service.log
+    max-size: 10MB
+    max-history: 30
+
+# Application Info
+info:
+  app:
+    name: Inventory Command Service
+    description: Write operations for distributed inventory management
+    version: 1.0.0
+    encoding: UTF-8
+    java:
+      version: 17

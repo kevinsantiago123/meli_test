@@ -1,0 +1,118 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: inventory.query.service
+
+  # Jackson configuration
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      indent-output: true
+
+  # Cache configuration
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=10m
+    cache-names:
+      - inventoryItems
+      - availability
+      - storeInventory
+      - lowStockItems
+      - categoryItems
+      - inventoryStats
+
+  # Scheduled tasks
+  task:
+    scheduling:
+      pool:
+        size: 2
+
+# CSV Storage configuration
+csv:
+  storage:
+    path: src/main/resources/data
+  query:
+    filename: inventory-query.csv
+
+# Event Consumer configuration
+event:
+  consumer:
+    command-service-url: http://localhost:8081
+    poll-interval: 5000  # 5 seconds
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventoryQuery:
+        register-health-indicator: true
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+
+  ratelimiter:
+    instances:
+      inventoryQueryApi:
+        limit-for-period: 200
+        limit-refresh-period: 1s
+        timeout-duration: 0s
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,caches,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# OpenAPI/Swagger Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.inventory: DEBUG
+    org.springframework: INFO
+    io.github.resilience4j: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/inventory-query-service.log
+    max-size: 10MB
+    max-history: 30
+
+# Application Info
+info:
+  app:
+    name: Inventory Query Service
+    description: Read operations for distributed inventory management (CQRS Query Side)
+    version: 1.0.0
+    encoding: UTF-8
+    java:
+      version: 17
