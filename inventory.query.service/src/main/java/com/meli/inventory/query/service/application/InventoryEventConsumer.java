@@ -3,7 +3,8 @@ package com.meli.inventory.query.service.application;
 import com.meli.inventory.query.service.domain.model.InventoryProjection;
 import com.meli.inventory.query.service.domain.port.out.InventoryQueryRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -28,8 +29,9 @@ import java.util.Map;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class InventoryEventConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(InventoryEventConsumer.class);
 
     private final InventoryQueryRepository queryRepository;
     private final RestTemplate restTemplate = new RestTemplate();

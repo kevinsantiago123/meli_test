@@ -55,6 +55,22 @@ public class InventoryCommandServiceImpl implements InventoryCommandService {
         }
 
         // Crear item usando lógica de dominio
+        InventoryItem item = createInventoryItemDomain(command);
+
+        // Persistir
+        InventoryItem savedItem = inventoryRepository.save(item);
+
+        // Crear y publicar evento
+        InventoryEvent event = createInventoryEvent(command, item);
+
+        eventRepository.save(event);
+        eventPublisher.publish(event);
+
+        log.info("Inventory item created successfully - ID: {}", savedItem.getId());
+        return savedItem;
+    }
+
+    private static InventoryItem createInventoryItemDomain(CreateInventoryItemCommand command) {
         InventoryItem item = InventoryItem.create(
                 command.getStoreId(),
                 command.getProductId(),
@@ -63,11 +79,10 @@ public class InventoryCommandServiceImpl implements InventoryCommandService {
                 command.getMinThreshold(),
                 command.getUserId()
         );
+        return item;
+    }
 
-        // Persistir
-        InventoryItem savedItem = inventoryRepository.save(item);
-
-        // Crear y publicar evento
+    private static InventoryEvent createInventoryEvent(CreateInventoryItemCommand command, InventoryItem item) {
         Map<String, Object> payload = new HashMap<>();
         payload.put("productId", item.getProductId());
         payload.put("productName", item.getProductName());
@@ -82,12 +97,7 @@ public class InventoryCommandServiceImpl implements InventoryCommandService {
                 payload,
                 item.getVersion()
         );
-
-        eventRepository.save(event);
-        eventPublisher.publish(event);
-
-        log.info("Inventory item created successfully - ID: {}", savedItem.getId());
-        return savedItem;
+        return event;
     }
 
     @Override
