@@ -1,0 +1,3 @@
+"id","storeId","productId","productName","quantity","reservedQuantity","minThreshold","version","lastUpdated","lastModifiedBy"
+"1760020e-a3ba-41b0-a658-8d155d95051e","STORE-001","PROD-001","Laptop Dell","100","0","10","1","2025-10-26T19:46:03.337238","admin"
+"ad483e83-a05d-4f0a-b71e-968e9ff53e48","STORE-001","PROD-002","Laptop Lenovo","100","0","10","1","2025-10-26T19:46:27.784087","admin"

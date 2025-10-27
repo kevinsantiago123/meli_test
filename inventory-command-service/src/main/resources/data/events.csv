@@ -1,0 +1,3 @@
+"eventId","eventType","aggregateId","storeId","timestamp","userId","payload","version"
+"9184f412-28ac-4061-b39c-27ce860b031e","ITEM_CREATED","1760020e-a3ba-41b0-a658-8d155d95051e","STORE-001","2025-10-26T19:46:03.340752","admin","{""quantity"":100,""productId"":""PROD-001"",""minThreshold"":10,""productName"":""Laptop Dell""}","1"
+"e630556f-3ec5-406c-b674-29097df1e6b7","ITEM_CREATED","ad483e83-a05d-4f0a-b71e-968e9ff53e48","STORE-001","2025-10-26T19:46:27.785744","admin","{""quantity"":100,""productId"":""PROD-002"",""minThreshold"":10,""productName"":""Laptop Lenovo""}","1"
