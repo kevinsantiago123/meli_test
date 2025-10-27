@@ -72,8 +72,6 @@ public class InventoryItem {
      */
     private String lastModifiedBy;
 
-    // ===== Métodos de Negocio (Domain Logic) =====
-
     /**
      * Crea un nuevo item de inventario con valores iniciales
      */

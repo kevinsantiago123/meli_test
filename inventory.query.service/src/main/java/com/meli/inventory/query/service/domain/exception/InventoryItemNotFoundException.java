@@ -5,7 +5,6 @@ public class InventoryItemNotFoundException extends RuntimeException {
 
     /**
      * Constructor con mensaje personalizado
-     *
      * @param message Mensaje de error
      */
     public InventoryItemNotFoundException(String message) {
@@ -14,7 +13,6 @@ public class InventoryItemNotFoundException extends RuntimeException {
 
     /**
      * Constructor para item no encontrado por producto y tienda
-     *
      * @param productId ID del producto
      * @param storeId ID de la tienda
      */

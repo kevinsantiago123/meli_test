@@ -17,14 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Controlador REST para operaciones de escritura (Command)
- *
- * Endpoints:
- * - POST   /api/v1/inventory              - Crear item
- * - PUT    /api/v1/inventory/{id}/stock   - Actualizar stock
- * - POST   /api/v1/inventory/{id}/reserve - Reservar stock
- * - POST   /api/v1/inventory/{id}/release - Liberar reserva
- * - POST   /api/v1/inventory/{id}/confirm - Confirmar reserva
- * - DELETE /api/v1/inventory/{id}         - Eliminar item
  */
 @RestController
 @RequestMapping("/api/v1/inventory")

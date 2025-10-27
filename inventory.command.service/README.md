@@ -1,7 +1,7 @@
 # Inventory Command Service
 
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.java.net/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Maven](https://img.shields.io/badge/Maven-3.8+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -170,10 +170,10 @@ mvn -version
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/tu-usuario/inventory-management-system.git
+git clone https://github.com/KevinSantiago123/meli_test.git
 
 # Navegar al servicio
-cd inventory-management-system/inventory-command-service
+cd inventory-management-system/inventory.command.service
 ```
 
 ### Opción 2: Descomprimir ZIP
@@ -183,7 +183,7 @@ cd inventory-management-system/inventory-command-service
 unzip inventory-management-system.zip
 
 # Navegar al servicio
-cd inventory-management-system/inventory-command-service
+cd inventory-management-system/inventory.command.service
 ```
 
 ### Compilar el Proyecto
@@ -235,19 +235,6 @@ logging:
   level:
     root: ${LOGGING_LEVEL:INFO}
     com.inventory: DEBUG
-```
-
-### Perfiles de Spring
-
-```bash
-# Desarrollo
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-
-# Producción
-mvn spring-boot:run -Dspring-boot.run.profiles=prod
-
-# Testing
-mvn spring-boot:run -Dspring-boot.run.profiles=test
 ```
 
 ---
@@ -428,17 +415,6 @@ curl http://localhost:8081/v3/api-docs.yaml
 | POST | `/api/v1/inventory/{id}/confirm` | Confirmar venta |
 | DELETE | `/api/v1/inventory/{id}` | Eliminar producto |
 | GET | `/api/v1/events/pending` | Obtener eventos |
-
-### Colección Postman
-
-Importa la colección para testing:
-
-**Archivo:** `postman/inventory-command-service.postman_collection.json`
-
-```bash
-# Importar en Postman
-Postman → File → Import → Seleccionar archivo
-```
 
 ---
 
@@ -646,156 +622,7 @@ scrape_configs:
 
 ---
 
-## 🐛 Troubleshooting
-
-### Problemas Comunes
-
-#### 1. Puerto ya en uso
-
-**Error:**
-```
-Port 8081 is already in use
-```
-
-**Solución:**
-```bash
-# Encontrar proceso usando el puerto
-lsof -i :8081  # Mac/Linux
-netstat -ano | findstr :8081  # Windows
-
-# Matar proceso
-kill -9 <PID>  # Mac/Linux
-taskkill /PID <PID> /F  # Windows
-
-# O cambiar puerto
-mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8082
-```
-
-#### 2. Error de compilación Maven
-
-**Error:**
-```
-Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin
-```
-
-**Solución:**
-```bash
-# Limpiar cache de Maven
-mvn clean
-
-# Eliminar carpeta target
-rm -rf target
-
-# Actualizar dependencias
-mvn clean install -U
-
-# Verificar versión de Java
-java -version  # Debe ser 17+
-```
-
-#### 3. CSV file locked
-
-**Error:**
-```
-IOException: The process cannot access the file because it is being used
-```
-
-**Solución:**
-```bash
-# Cerrar Excel u otros programas que tengan el CSV abierto
-# Reiniciar el servicio
-# Verificar permisos de escritura en carpeta data/
-chmod -R 755 src/main/resources/data  # Linux/Mac
-```
-
-#### 4. OutOfMemoryError
-
-**Error:**
-```
-java.lang.OutOfMemoryError: Java heap space
-```
-
-**Solución:**
-```bash
-# Aumentar memoria heap
-java -Xmx1024m -jar target/inventory-command-service-1.0.0.jar
-
-# O en Maven
-export MAVEN_OPTS="-Xmx1024m"
-mvn spring-boot:run
-```
-
-#### 5. Optimistic Lock Exception frecuente
-
-**Error:**
-```
-OptimisticLockException: Version mismatch
-```
-
-**Causa:** Alta concurrencia o version incorrecta
-
-**Solución:**
-```bash
-# 1. Obtener version actual
-curl http://localhost:8082/api/v1/inventory/{id}
-
-# 2. Usar la version correcta en el request
-# 3. Implementar retry logic en el cliente
-```
-
-### Logs de Debug
-
-```bash
-# Habilitar debug logging
-mvn spring-boot:run -Dspring-boot.run.arguments=--logging.level.com.inventory=DEBUG
-
-# Ver todos los logs de Resilience4j
-mvn spring-boot:run -Dspring-boot.run.arguments=--logging.level.io.github.resilience4j=DEBUG
-```
-
-### Verificar Estado del Servicio
-
-```bash
-# Script de verificación
-./scripts/health-check.sh
-```
-
-**health-check.sh:**
-```bash
-#!/bin/bash
-
-echo "🔍 Verificando Inventory Command Service..."
-
-# 1. Verificar que está corriendo
-if curl -s http://localhost:8081/actuator/health > /dev/null; then
-    echo "✅ Servicio está UP"
-else
-    echo "❌ Servicio NO responde"
-    exit 1
-fi
-
-# 2. Verificar Circuit Breakers
-CB_STATE=$(curl -s http://localhost:8081/actuator/circuitbreakers | jq -r '.circuitBreakers.inventoryCommand.state')
-echo "🔌 Circuit Breaker: $CB_STATE"
-
-# 3. Verificar espacio en disco
-DISK_STATUS=$(curl -s http://localhost:8081/actuator/health | jq -r '.components.diskSpace.status')
-echo "💾 Disk Space: $DISK_STATUS"
-
-echo "✅ Verificación completa"
-```
-
----
-
 ## 🤝 Contribución
-
-### Guía de Contribución
-
-1. Fork el proyecto
-2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
 
 ### Estándares de Código
 
@@ -825,26 +652,13 @@ Este proyecto está bajo la Licencia MIT - ver archivo [LICENSE](LICENSE) para d
 
 ## 👥 Equipo
 
-- **Desarrollador Principal:** [Tu Nombre]
-- **Arquitecto:** [Nombre]
-- **QA Lead:** [Nombre]
+- **Desarrollador Principal:** Kevin Santiago Castañeda Trujillo
 
 ---
 
 ## 📞 Soporte
 
-- **Issues:** https://github.com/tu-usuario/inventory-management/issues
-- **Email:** support@inventory-system.com
-- **Slack:** #inventory-command-service
-
----
-
-## 🔗 Links Útiles
-
-- [Documentación Completa](../docs/README.md)
-- [Query Service](../inventory-query-service/README.md)
-- [Arquitectura del Sistema](../docs/ARQUITECTURA.md)
-- [Guía de Deployment](../docs/DEPLOYMENT.md)
+- **Email:** kcastanedat@gmail.com
 
 ---
 

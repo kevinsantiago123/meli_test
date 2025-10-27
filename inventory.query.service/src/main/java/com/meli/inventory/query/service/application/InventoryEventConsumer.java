@@ -18,13 +18,8 @@ import java.util.Map;
 
 /**
  * Event Consumer - Sincroniza proyecciones de lectura
- *
  * Consume eventos del Command Service y actualiza las proyecciones de lectura.
  * Implementa Eventual Consistency.
- * En producción, esto sería reemplazado por:
- * - Kafka Consumer
- * - RabbitMQ Listener
- * - AWS SQS Consumer
  * Para este prototipo, hace polling periódico al Command Service.
  */
 @Component
@@ -190,7 +185,6 @@ public class InventoryEventConsumer {
 
     /**
      * Helper para obtener nombre de tienda
-     * En producción, esto vendría de un servicio de catálogo
      */
     private String getStoreName(String storeId) {
         return switch (storeId) {

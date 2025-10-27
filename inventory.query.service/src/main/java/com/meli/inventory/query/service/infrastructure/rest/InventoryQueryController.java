@@ -19,14 +19,6 @@ import java.util.List;
 /**
  * Controlador REST para operaciones de consulta (Query)
  * Endpoints de solo lectura optimizados para consultas frecuentes.
- * Endpoints:
- * - GET /api/v1/inventory/{id}                    - Obtener por ID
- * - GET /api/v1/inventory/store/{storeId}         - Listar por tienda
- * - GET /api/v1/inventory/availability            - Verificar disponibilidad
- * - GET /api/v1/inventory/low-stock               - Items con stock bajo
- * - GET /api/v1/inventory/out-of-stock            - Items sin stock
- * - GET /api/v1/inventory/search                  - Buscar por nombre
- * - GET /api/v1/inventory/stats/{storeId}         - Estadísticas
  */
 @RestController
 @RequestMapping("/api/v1/inventory")

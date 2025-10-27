@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 /**
  * Proyección de lectura - InventoryProjection
- * Modelo desnormalizado optimizado para consultas (CQRS Query Side).
+ * Modelo optimizado para consultas (CQRS Query Side).
  * Contiene datos agregados y calculados para mejorar performance de lectura.
  * Diferencias con InventoryItem (Command Side):
  * - Sin lógica de negocio (solo lectura)

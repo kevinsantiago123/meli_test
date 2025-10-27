@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 /**
  * Implementación del repositorio usando archivos CSV
- *
  * Características:
  * - Thread-safe usando ReadWriteLock
  * - File locking para concurrencia multi-proceso

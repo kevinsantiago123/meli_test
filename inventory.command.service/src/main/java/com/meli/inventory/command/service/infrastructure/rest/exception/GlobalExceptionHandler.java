@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Global Exception Handler
- *
  * Maneja todas las excepciones de la aplicación y devuelve
  * respuestas consistentes al cliente.
  */

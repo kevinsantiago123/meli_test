@@ -16,7 +16,6 @@ public interface InventoryQueryService {
 
     /**
      * Obtiene un item por ID
-     *
      * @param id Identificador del item
      * @return Proyección del item de inventario
      * @throws InventoryItemNotFoundException si no existe
@@ -25,7 +24,6 @@ public interface InventoryQueryService {
 
     /**
      * Verifica disponibilidad de un producto en una tienda
-     *
      * @param productId ID del producto
      * @param storeId ID de la tienda
      * @return Información de disponibilidad
@@ -35,7 +33,6 @@ public interface InventoryQueryService {
 
     /**
      * Obtiene todos los items de una tienda con paginación
-     *
      * @param storeId ID de la tienda
      * @param pageable Configuración de paginación
      * @return Página de items de inventario
@@ -44,7 +41,6 @@ public interface InventoryQueryService {
 
     /**
      * Obtiene items con stock bajo (below threshold)
-     *
      * @param storeId ID de la tienda
      * @return Lista de items con stock bajo
      */
@@ -52,7 +48,6 @@ public interface InventoryQueryService {
 
     /**
      * Obtiene items sin stock (quantity = 0)
-     *
      * @param storeId ID de la tienda
      * @return Lista de items sin stock
      */
@@ -60,7 +55,6 @@ public interface InventoryQueryService {
 
     /**
      * Busca items por nombre de producto
-     *
      * @param storeId ID de la tienda
      * @param searchTerm Término de búsqueda
      * @return Lista de items que coinciden con la búsqueda
@@ -69,7 +63,6 @@ public interface InventoryQueryService {
 
     /**
      * Obtiene items por categoría
-     *
      * @param storeId ID de la tienda
      * @param category Categoría del producto
      * @return Lista de items de la categoría
@@ -78,7 +71,6 @@ public interface InventoryQueryService {
 
     /**
      * Obtiene estadísticas de inventario por tienda
-     *
      * @param storeId ID de la tienda
      * @return Estadísticas agregadas del inventario
      */
@@ -86,8 +78,6 @@ public interface InventoryQueryService {
 
     /**
      * DTO para información de disponibilidad
-     *
-     * Record inline - no necesita archivo separado
      */
     record AvailabilityInfo(
             String productId,
@@ -101,7 +91,6 @@ public interface InventoryQueryService {
 
     /**
      * DTO para estadísticas de inventario
-     *
      * Record inline - no necesita archivo separado
      */
     record InventoryStats(

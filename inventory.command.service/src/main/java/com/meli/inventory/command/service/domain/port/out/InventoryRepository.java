@@ -7,7 +7,6 @@ import java.util.Optional;
 
 /**
  * Puerto de salida (Output Port) - Repositorio de Inventario
- *
  * Define el contrato para persistencia sin especificar implementación.
  * Implementado por adaptadores en la capa de infraestructura.
  */

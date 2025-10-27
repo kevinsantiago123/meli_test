@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Puerto de entrada (Input Port) - Casos de uso de Inventario
- *
  * Define las operaciones disponibles en el dominio.
  * Implementado por servicios de aplicación.
  */

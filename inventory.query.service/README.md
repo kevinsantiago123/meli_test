@@ -6,7 +6,7 @@
 [![Caffeine](https://img.shields.io/badge/Cache-Caffeine-red.svg)](https://github.com/ben-manes/caffeine)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Microservicio de **lectura** (Query Side) del sistema de gestión de inventario distribuido, optimizado para consultas de alta frecuencia con cache y proyecciones desnormalizadas.
+Microservicio de **lectura** (Query Side) del sistema de gestión de inventario distribuido, optimizado para consultas de alta frecuencia con cache.
 
 ---
 
@@ -40,7 +40,6 @@ El **Inventory Query Service** es responsable de todas las operaciones de **lect
 - ✅ Estadísticas agregadas de inventario
 - ✅ Cache multinivel para máximo performance
 - ✅ Sincronización automática vía eventos
-- ✅ Proyecciones desnormalizadas para lectura
 
 ---
 
@@ -49,7 +48,6 @@ El **Inventory Query Service** es responsable de todas las operaciones de **lect
 ### Arquitectura y Diseño
 - **Hexagonal Architecture** (Ports & Adapters)
 - **CQRS Query Side** - Optimizado para lectura
-- **Proyecciones Desnormalizadas** - Modelo especializado
 - **Event-Driven** - Sincronización automática
 
 ### Performance y Optimización
@@ -234,10 +232,10 @@ mvn -version
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/tu-usuario/inventory-management-system.git
+git clone https://github.com/KevinSantiago123/meli_test.git
 
 # Navegar al servicio
-cd inventory-management-system/inventory-query-service
+cd inventory-management-system/inventory.query.service
 ```
 
 ### Opción 2: Descomprimir ZIP
@@ -247,7 +245,7 @@ cd inventory-management-system/inventory-query-service
 unzip inventory-management-system.zip
 
 # Navegar al servicio
-cd inventory-management-system/inventory-query-service
+cd inventory-management-system/inventory.query.service
 ```
 
 ### Compilar el Proyecto
@@ -370,18 +368,6 @@ event:
     poll-interval: 2000  # Más frecuente para dev
 ```
 
-**application-prod.yml:**
-```yaml
-logging:
-  level:
-    com.inventory: INFO
-    org.springframework.cache: WARN
-
-spring:
-  cache:
-    caffeine:
-      spec: maximumSize=5000,expireAfterWrite=30m  # Cache más grande
-```
 
 ---
 
@@ -680,12 +666,6 @@ curl http://localhost:8082/v3/api-docs.yaml
 }
 ```
 
-### Colección Postman
-
-Importa la colección para testing:
-
-**Archivo:** `postman/inventory-query-service.postman_collection.json`
-
 ---
 
 ## 💾 Cache Strategy
@@ -732,26 +712,6 @@ public class CacheConfig {
 | categoryItems | 10 min | 200 | Items por categoría |
 | inventoryStats | 10 min | 50 | Estadísticas agregadas |
 
-### Uso en Código
-
-```java
-@Service
-public class InventoryQueryServiceImpl implements InventoryQueryService {
-    
-    @Cacheable(value = "inventoryItems", key = "#id")
-    public InventoryProjection getById(String id) {
-        // Se ejecuta solo si no está en cache
-        return repository.findById(id)
-            .orElseThrow(() -> new InventoryItemNotFoundException(id));
-    }
-    
-    @Cacheable(value = "availability", key = "#productId + '_' + #storeId")
-    public AvailabilityInfo checkAvailability(String productId, String storeId) {
-        // Cache key ejemplo: "PROD-001_STORE-001"
-        // ...
-    }
-}
-```
 
 ### Invalidación de Cache
 
@@ -851,29 +811,6 @@ event:
 | RESERVATION_CONFIRMED | Confirmar venta |
 | ITEM_DELETED | Eliminar proyección |
 
-### Manejo de Errores
-
-```java
-@Scheduled(fixedDelay = 5000, initialDelay = 10000)
-public void consumeEvents() {
-    try {
-        List<EventDto> events = fetchEventsFromCommandService();
-        
-        for (EventDto event : events) {
-            try {
-                processEvent(event);
-            } catch (Exception e) {
-                log.error("Error processing event {}: {}", 
-                    event.getEventId(), e.getMessage());
-                // Continúa con siguiente evento
-            }
-        }
-    } catch (Exception e) {
-        log.error("Error fetching events: {}", e.getMessage());
-        // Reintenta en próximo ciclo
-    }
-}
-```
 
 ### Monitoreo del Consumer
 
@@ -1073,199 +1010,9 @@ public Page<InventoryProjection> findByStoreId(String storeId, Pageable pageable
 }
 ```
 
-### Tuning de Performance
-
-#### Aumentar Tamaño de Cache
-
-```yaml
-spring:
-  cache:
-    caffeine:
-      spec: maximumSize=5000,expireAfterWrite=30m
-```
-
-#### Reducir Intervalo de Polling
-
-```yaml
-event:
-  consumer:
-    poll-interval: 2000  # 2 segundos (más carga en Command Service)
-```
-
-#### Aumentar Rate Limit
-
-```yaml
-resilience4j:
-  ratelimiter:
-    instances:
-      inventoryQueryApi:
-        limit-for-period: 500  # Más requests permitidos
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Problemas Comunes
-
-#### 1. Command Service no accesible
-
-**Error:**
-```
-Connection refused: http://localhost:8081
-```
-
-**Solución:**
-```bash
-# Verificar que Command Service está corriendo
-curl http://localhost:8081/actuator/health
-
-# Si no, iniciarlo
-cd ../inventory-command-service
-mvn spring-boot:run
-
-# Esperar 10 segundos y reiniciar Query Service
-```
-
-#### 2. Eventos no se sincronizan
-
-**Síntoma:** Datos no actualizados después de escritura
-
-**Diagnóstico:**
-```bash
-# Ver logs del consumer
-tail -f logs/inventory-query-service.log | grep "EventConsumer"
-
-# Verificar si hay eventos pendientes
-curl http://localhost:8081/api/v1/events/pending
-```
-
-**Solución:**
-```bash
-# 1. Verificar conectividad
-curl http://localhost:8081/actuator/health
-
-# 2. Revisar configuración
-cat src/main/resources/application.yml | grep -A 3 "event:"
-
-# 3. Reiniciar Query Service
-```
-
-#### 3. Cache no funciona
-
-**Síntoma:** Tiempos de respuesta siempre altos
-
-**Diagnóstico:**
-```bash
-# Ver estadísticas de cache
-curl http://localhost:8082/actuator/caches | jq
-
-# Verificar hit rate
-curl http://localhost:8082/actuator/metrics/cache.gets?tag=result:hit
-```
-
-**Solución:**
-```bash
-# 1. Verificar que @EnableCaching está presente
-grep "@EnableCaching" src/main/java/**/InventoryQueryServiceApplication.java
-
-# 2. Verificar configuración
-cat src/main/resources/application.yml | grep -A 10 "cache:"
-
-# 3. Limpiar y reiniciar
-curl -X DELETE http://localhost:8082/actuator/caches
-```
-
-#### 4. OutOfMemoryError por cache grande
-
-**Error:**
-```
-java.lang.OutOfMemoryError: Java heap space
-```
-
-**Solución:**
-```bash
-# Reducir tamaño de cache
-# En application.yml:
-spring.cache.caffeine.spec: maximumSize=500,expireAfterWrite=5m
-
-# O aumentar heap
-java -Xmx1024m -jar target/inventory-query-service-1.0.0.jar
-```
-
-#### 5. Latencia alta en queries
-
-**Diagnóstico:**
-```bash
-# Verificar cache hit rate
-curl http://localhost:8082/actuator/metrics/cache.gets
-
-# Ver métricas de latencia
-curl http://localhost:8082/actuator/metrics/http.server.requests
-```
-
-**Solución:**
-```bash
-# 1. Aumentar TTL del cache (menos misses)
-spring.cache.caffeine.spec: expireAfterWrite=30m
-
-# 2. Aumentar tamaño del cache
-spring.cache.caffeine.spec: maximumSize=5000
-
-# 3. Añadir índices adicionales en repository
-```
-
-### Verificar Estado Completo
-
-```bash
-#!/bin/bash
-# health-check-query.sh
-
-echo "🔍 Verificando Query Service..."
-
-# 1. Health check
-if curl -s http://localhost:8082/actuator/health | grep -q "UP"; then
-    echo "✅ Servicio está UP"
-else
-    echo "❌ Servicio NO responde"
-    exit 1
-fi
-
-# 2. Verificar Command Service
-if curl -s http://localhost:8081/actuator/health | grep -q "UP"; then
-    echo "✅ Command Service accesible"
-else
-    echo "⚠️  Command Service NO accesible - sincronización afectada"
-fi
-
-# 3. Cache hit rate
-HIT_RATE=$(curl -s http://localhost:8082/actuator/caches | jq -r '.cacheManagers[0].caches[0].statistics.hitRate')
-echo "📊 Cache Hit Rate: $HIT_RATE"
-
-if (( $(echo "$HIT_RATE > 0.8" | bc -l) )); then
-    echo "✅ Cache funcionando bien"
-else
-    echo "⚠️  Cache hit rate bajo - considerar ajustes"
-fi
-
-# 4. Último evento procesado
-LAST_EVENT=$(grep "Received.*events" logs/inventory-query-service.log | tail -1)
-echo "🔄 Última sincronización: $LAST_EVENT"
-
-echo "✅ Verificación completa"
-```
-
 ---
 
 ## 🤝 Contribución
-
-### Guía de Contribución
-
-1. Fork el proyecto
-2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
 
 ### Estándares de Código
 
@@ -1295,26 +1042,13 @@ Este proyecto está bajo la Licencia MIT - ver archivo [LICENSE](LICENSE) para d
 
 ## 👥 Equipo
 
-- **Desarrollador Principal:** [Tu Nombre]
-- **Arquitecto:** [Nombre]
-- **Performance Engineer:** [Nombre]
+- **Desarrollador Principal:** Kevin Santiago Castañeda Trujillo
 
 ---
 
 ## 📞 Soporte
 
-- **Issues:** https://github.com/tu-usuario/inventory-management/issues
-- **Email:** support@inventory-system.com
-- **Slack:** #inventory-query-service
-
----
-
-## 🔗 Links Útiles
-
-- [Documentación Completa](../docs/README.md)
-- [Command Service](../inventory-command-service/README.md)
-- [Guía de Integración](../docs/INTEGRATION.md)
-- [Performance Tuning](../docs/PERFORMANCE.md)
+- **Email:** kcastanedat@gmail.com
 
 ---
 
@@ -1323,7 +1057,6 @@ Este proyecto está bajo la Licencia MIT - ver archivo [LICENSE](LICENSE) para d
 - [x] Implementación básica queries
 - [x] Cache con Caffeine
 - [x] Event Consumer
-- [x] Proyecciones desnormalizadas
 - [x] Paginación y búsqueda
 - [ ] Redis cache (distribuido)
 - [ ] Elasticsearch para búsqueda avanzada

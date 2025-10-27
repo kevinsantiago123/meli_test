@@ -17,8 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * - Apache Kafka
  * - RabbitMQ
  * - AWS SNS/SQS
- * - etc.
- *
  * Para este prototipo, simplemente mantiene una cola en memoria
  * que puede ser consumida por otros servicios.
  */
